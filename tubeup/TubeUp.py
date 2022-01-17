@@ -513,6 +513,6 @@ class TubeUp(object):
 
             # Set 'scanner' metadata pair to allow tracking of TubeUp
             # powered uploads, per request from archive.org
-            scanner="TubeUp Stream Mirroring Application - Leet's Audio Fork 0.0.28"
+            scanner="TubeUp Stream Mirroring Application - Leet's Audio Fork 0.0.28")
 
         return metadata
