@@ -463,7 +463,7 @@ class TubeUp(object):
 
         # load up tags into an IA compatible semicolon-separated string
         # example: Youtube;video;
-        tags_string = '%s;audio;' % vid_meta['extractor_key']
+        tags_string = '%s;audio;soundcloud;' % vid_meta['extractor_key']
 
         if 'categories' in vid_meta:
             # add categories as tags as well, if they exist
@@ -499,8 +499,7 @@ class TubeUp(object):
             description_text, videourl, videourl, uploader_url, uploader)
 
         metadata = dict(
-            mediatype=('audio' if collection == 'opensource_audio'
-                       else 'movies'),
+            mediatype=('audio'),
             creator=uploader,
             collection=collection,
             title=title,
