@@ -450,7 +450,7 @@ class TubeUp(object):
         except TypeError:  # apparently uploader is null as well
             uploader = 'tubeup.py'
 
-        uploader_url = vid_meta.get('uploader_url', videourl)
+        uploader_url = 'https://www.twitch.tv/anthroexpo'
 
         try:  # some videos don't give an upload date
             d = datetime.strptime(vid_meta['upload_date'], '%Y%m%d')
@@ -463,7 +463,7 @@ class TubeUp(object):
 
         # load up tags into an IA compatible semicolon-separated string
         # example: Youtube;video;
-        tags_string = '%s;Twitch;TwitchVOD;video;convention;ANEX;ANEX22;ANEX2022;Anthro Expo;AnthroExpo;furry;' % vid_meta['extractor_key']
+        tags_string = '%s;Twitch;video;convention;ANEX;ANEX22;ANEX2022;Anthro Expo;AnthroExpo;Anthro Expo 2022;AnthroExpo 2022;furry;' % vid_meta['extractor_key']
 
         if 'categories' in vid_meta:
             # add categories as tags as well, if they exist
