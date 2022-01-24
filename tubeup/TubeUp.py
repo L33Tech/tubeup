@@ -463,7 +463,7 @@ class TubeUp(object):
 
         # load up tags into an IA compatible semicolon-separated string
         # example: Youtube;video;
-        tags_string = '%s;audio;soundcloud;' % vid_meta['extractor_key']
+        tags_string = '%s;Twitch;TwitchVOD;video;convention;ANEX;ANEX22;ANEX2022;Anthro Expo;AnthroExpo;furry;' % vid_meta['extractor_key']
 
         if 'categories' in vid_meta:
             # add categories as tags as well, if they exist
@@ -512,6 +512,6 @@ class TubeUp(object):
 
             # Set 'scanner' metadata pair to allow tracking of TubeUp
             # powered uploads, per request from archive.org
-            scanner="TubeUp Stream Mirroring Application - Leet's Audio Fork 0.0.28")
+            scanner="TubeUp Stream Mirroring Application - Leet's Fork 0.0.28")
 
         return metadata
