@@ -141,7 +141,6 @@ class TubeUpTests(unittest.TestCase):
             'forcejson': False,
             'writeinfojson': True,
             'writedescription': True,
-            'getcomments': False,
             'writethumbnail': True,
             'writeannotations': True,
             'writesubtitles': True,
@@ -174,7 +173,6 @@ class TubeUpTests(unittest.TestCase):
             'forcejson': False,
             'writeinfojson': True,
             'writedescription': True,
-            'getcomments': False,
             'writethumbnail': True,
             'writeannotations': True,
             'writesubtitles': True,
@@ -208,7 +206,6 @@ class TubeUpTests(unittest.TestCase):
             'forcejson': False,
             'writeinfojson': True,
             'writedescription': True,
-            'getcomments': False,
             'writethumbnail': True,
             'writeannotations': True,
             'writesubtitles': True,
@@ -244,7 +241,6 @@ class TubeUpTests(unittest.TestCase):
             'forcejson': False,
             'writeinfojson': True,
             'writedescription': True,
-            'getcomments': False,
             'writethumbnail': True,
             'writeannotations': True,
             'writesubtitles': True,
@@ -282,7 +278,6 @@ class TubeUpTests(unittest.TestCase):
             'forcejson': False,
             'writeinfojson': True,
             'writedescription': True,
-            'getcomments': False,
             'writethumbnail': True,
             'writeannotations': True,
             'writesubtitles': True,
@@ -312,6 +307,7 @@ class TubeUpTests(unittest.TestCase):
 
         expected_result = {
             'mediatype': 'movies',
+            'channel': 'http://www.youtube.com/channel/UCWpsozCMdAnfI16rZHQ9XDg',
             'creator': 'Video Background',
             'collection': 'opensource_movies',
             'title': 'Mountain 3 - Video Background HD 1080p',
@@ -320,12 +316,7 @@ class TubeUpTests(unittest.TestCase):
                             'channel in description:<br>https://www.youtube.com'
                             '/channel/UCWpsozCMdAnfI16rZHQ9XDg<br>© Don\'t '
                             'forget to SUBSCRIBE, LIKE, COMMENT and RATE. '
-                            'Hope you all enjoy! <br/><br/>Source: '
-                            '<a href="https://www.youtube.com/watch?v='
-                            '6iRV8liah8A">https://www.youtube.com/watch?v='
-                            '6iRV8liah8A</a><br/>Uploader: <a href="http://ww'
-                            'w.youtube.com/channel/UCWpsozCMdAnfI16rZHQ9XDg">'
-                            'Video Background</a>'),
+                            'Hope you all enjoy!'),
             'date': '2015-01-05',
             'year': '2015',
             'subject': ('Youtube;video;Entertainment;Video Background;Footage;'
@@ -348,8 +339,7 @@ class TubeUpTests(unittest.TestCase):
             vid_meta
         )
 
-        expected_description = (' <br/><br/>Source: <a href="url">url</a><br/>'
-                                'Uploader: <a href="url">tubeup.py</a>')
+        expected_description = ('')
 
         self.assertEqual(expected_description, result.get('description'))
 
@@ -366,6 +356,7 @@ class TubeUpTests(unittest.TestCase):
 
         expected_result = {
             'mediatype': 'movies',
+            'channel': 'http://www.youtube.com/channel/UCWpsozCMdAnfI16rZHQ9XDg',
             'creator': 'http://www.youtube.com/channel/UCWpsozCMdAnfI16rZHQ9XDg',
             'collection': 'opensource_movies',
             'title': 'Mountain 3 - Video Background HD 1080p',
@@ -374,13 +365,7 @@ class TubeUpTests(unittest.TestCase):
                             'channel in description:<br>https://www.youtube.com'
                             '/channel/UCWpsozCMdAnfI16rZHQ9XDg<br>© Don\'t '
                             'forget to SUBSCRIBE, LIKE, COMMENT and RATE. '
-                            'Hope you all enjoy! <br/><br/>Source: '
-                            '<a href="https://www.youtube.com/watch?v='
-                            '6iRV8liah8A">https://www.youtube.com/watch?v='
-                            '6iRV8liah8A</a><br/>Uploader: <a href="http://ww'
-                            'w.youtube.com/channel/UCWpsozCMdAnfI16rZHQ9XDg">'
-                            'http://www.youtube.com/channel/UCWpsozCMdAnfI16rZ'
-                            'HQ9XDg</a>'),
+                            'Hope you all enjoy!'),
             'date': '2015-01-05',
             'year': '2015',
             'subject': ('Youtube;video;Entertainment;Video Background;Footage;'
@@ -409,6 +394,7 @@ class TubeUpTests(unittest.TestCase):
 
         expected_result = {
             'mediatype': 'movies',
+            'channel': 'http://www.youtube.com/channel/UCWpsozCMdAnfI16rZHQ9XDg',
             'creator': 'Video Background',
             'collection': 'opensource_movies',
             'title': 'Mountain 3 - Video Background HD 1080p',
@@ -417,12 +403,7 @@ class TubeUpTests(unittest.TestCase):
                             'channel in description:<br>https://www.youtube.com'
                             '/channel/UCWpsozCMdAnfI16rZHQ9XDg<br>© Don\'t '
                             'forget to SUBSCRIBE, LIKE, COMMENT and RATE. '
-                            'Hope you all enjoy! <br/><br/>Source: '
-                            '<a href="https://www.youtube.com/watch?v='
-                            '6iRV8liah8A">https://www.youtube.com/watch?v='
-                            '6iRV8liah8A</a><br/>Uploader: <a href="http://ww'
-                            'w.youtube.com/channel/UCWpsozCMdAnfI16rZHQ9XDg">'
-                            'Video Background</a>'),
+                            'Hope you all enjoy!'),
             'date': upload_date,
             'year': upload_year,
             'subject': ('Youtube;video;Entertainment;Video Background;Footage;'
@@ -450,9 +431,7 @@ class TubeUpTests(unittest.TestCase):
             'creator': 'EA',
             'collection': 'opensource_movies',
             'title': 'EA Play 2016 Live from the Novo Theatre',
-            'description': (' <br/><br/>Source: <a href="https://clips.twitch.tv/FaintLightGullWholeWheat">'
-                            'https://clips.twitch.tv/FaintLightGullWholeWheat</a><br/>Uploader: '
-                            '<a href="https://clips.twitch.tv/FaintLightGullWholeWheat">EA</a>'),
+            'description': (''),
             'date': '2016-06-12',
             'year': '2016',
             'subject': 'TwitchClips;video;',
@@ -469,7 +448,8 @@ class TubeUpTests(unittest.TestCase):
         copy_testfiles_to_tubeup_rootdir_test()
 
         result = tu.get_resource_basenames(
-            ['https://www.youtube.com/watch?v=KdsN9YhkDrY'])
+            ['https://www.youtube.com/watch?v=KdsN9YhkDrY'],
+            ignore_existing_item=True)
 
         expected_result = {os.path.join(
             current_path, 'test_tubeup_rootdir', 'downloads',
@@ -513,6 +493,7 @@ class TubeUpTests(unittest.TestCase):
             expected_result = (
                 'youtube-6iRV8liah8A',
                 {'mediatype': 'movies',
+                 'channel': 'http://www.youtube.com/channel/UCWpsozCMdAnfI16rZHQ9XDg',
                  'creator': 'Video Background',
                  'collection': 'opensource_movies',
                  'title': 'Mountain 3 - Video Background HD 1080p',
@@ -521,12 +502,7 @@ class TubeUpTests(unittest.TestCase):
                                  ' channel in description:<br>https://www.youtub'
                                  'e.com/channel/UCWpsozCMdAnfI16rZHQ9XDg<br>© D'
                                  'on\'t forget to SUBSCRIBE, LIKE, COMMENT an'
-                                 'd RATE. Hope you all enjoy! <br/><br/>Sourc'
-                                 'e: <a href="https://www.youtube.com/watch?v'
-                                 '=6iRV8liah8A">https://www.youtube.com/watch'
-                                 '?v=6iRV8liah8A</a><br/>Uploader: <a href="h'
-                                 'ttp://www.youtube.com/channel/UCWpsozCMdAnf'
-                                 'I16rZHQ9XDg">Video Background</a>'),
+                                 'd RATE. Hope you all enjoy!'),
                  'date': '2015-01-05',
                  'year': '2015',
                  'subject': ('Youtube;video;Entertainment;Video Background;'
@@ -576,6 +552,7 @@ class TubeUpTests(unittest.TestCase):
                 'youtube-KdsN9YhkDrY',
                 {'mediatype': 'movies',
                  'creator': 'RelaxingWorld',
+                 'channel': 'http://www.youtube.com/channel/UCWpsozCMdAnfI16rZHQ9XDg',
                  'collection': 'opensource_movies',
                  'title': 'Epic Ramadan - Video Background HD1080p',
                  'description': ('If you enjoy my work, please consider Subscribe to my NEW '
@@ -585,14 +562,7 @@ class TubeUpTests(unittest.TestCase):
                                  'in description: <br>'
                                  'Source from RelaxingWorld: https://goo.gl/HsW75m<br>'
                                  '<br>'
-                                 '▷ Also, do not forget to Subscribe to my channel. Thanks! '
-                                 '<br/><br/>Source: <a '
-                                 'href="https://www.youtube.com/watch?v=KdsN9YhkDrY">'
-                                 'https://www.youtube.com/watch?v=KdsN9YhkDrY</a><br/>Uploader: '
-                                 '<a '
-                                 'href="http://www.youtube.com/channel/UCWpsozCMdAnfI16rZHQ9XDg">'
-                                 'RelaxingWorld</a>'
-                                 ),
+                                 '▷ Also, do not forget to Subscribe to my channel. Thanks!'),
                  'date': '2016-06-25',
                  'year': '2016',
                  'subject': ('Youtube;video;Film & Animation;Video Background;'

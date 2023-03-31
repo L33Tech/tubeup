@@ -27,8 +27,7 @@ class TubeUp(object):
                  verbose=False,
                  dir_path='~/.tubeup',
                  ia_config_path=None,
-                 output_template=None,
-                 get_comments=False):
+                 output_template=None):
         """
         `tubeup` is a tool to archive YouTube by downloading the videos and
         uploading it back to the archive.org.
@@ -42,8 +41,6 @@ class TubeUp(object):
                                 be used in uploading the file.
         :param output_template: A template string that will be used to
                                 generate the output filenames.
-        :param get_comments:    A boolean, True means that the comments will
-                                be scraped.
         """
         self.dir_path = dir_path
         self.verbose = verbose
@@ -53,7 +50,6 @@ class TubeUp(object):
             self.output_template = '%(id)s.%(ext)s'
         else:
             self.output_template = output_template
-        self.get_comments = get_comments
 
         # Just print errors in quiet mode
         if not self.verbose:
@@ -89,7 +85,8 @@ class TubeUp(object):
     def get_resource_basenames(self, urls,
                                cookie_file=None, proxy_url=None,
                                ydl_username=None, ydl_password=None,
-                               use_download_archive=False):
+                               use_download_archive=False,
+                               ignore_existing_item=False):
         """
         Get resource basenames from an url.
 
@@ -105,9 +102,21 @@ class TubeUp(object):
                                       This will download only videos not listed in
                                       the archive file. Record the IDs of all
                                       downloaded videos in it.
+        :param ignore_existing_item:  Ignores the check for existing items on archive.org.
         :return:                      Set of videos basename that has been downloaded.
         """
         downloaded_files_basename = set()
+
+        def check_if_ia_item_exists(infodict):
+            itemname = sanitize_identifier('%s-%s' % (infodict['extractor'],
+                                                      infodict['display_id']))
+            item = internetarchive.get_item(itemname)
+            if item.exists and self.verbose:
+                print("\n:: Item already exists. Not downloading.")
+                print('Title: %s' % infodict['title'])
+                print('Video URL: %s\n' % infodict['webpage_url'])
+                return 1
+            return 0
 
         def ydl_progress_hook(d):
             if d['status'] == 'downloading' and self.verbose:
@@ -134,12 +143,11 @@ class TubeUp(object):
                 sys.stdout.flush()
 
             if d['status'] == 'finished':
-                msg = 'Downloaded %s' % d['filename']
+                msg = '\nDownloaded %s' % d['filename']
 
                 self.logger.debug(d)
                 self.logger.info(msg)
                 if self.verbose:
-                    print('\n%s' % d)
                     print(msg)
 
             if d['status'] == 'error':
@@ -157,13 +165,30 @@ class TubeUp(object):
 
         with YoutubeDL(ydl_opts) as ydl:
             for url in urls:
-                # Get the info dict of the url, it also download the resources
-                # if necessary.
-                info_dict = ydl.extract_info(url)
+                if not ignore_existing_item:
+                    # Get the info dict of the url
+                    info_dict = ydl.extract_info(url, download=False)
 
-                downloaded_files_basename.update(
-                    self.create_basenames_from_ydl_info_dict(ydl, info_dict)
-                )
+                    if info_dict.get('_type', 'video') == 'playlist':
+                        for entry in info_dict['entries']:
+                            if ydl.in_download_archive(entry):
+                                continue
+                            if check_if_ia_item_exists(entry) == 0:
+                                ydl.extract_info(entry['webpage_url'])
+                                downloaded_files_basename.update(self.create_basenames_from_ydl_info_dict(ydl, entry))
+                            else:
+                                ydl.record_download_archive(entry)
+                    else:
+                        if ydl.in_download_archive(info_dict):
+                            continue
+                        if check_if_ia_item_exists(info_dict) == 0:
+                            ydl.extract_info(url)
+                            downloaded_files_basename.update(self.create_basenames_from_ydl_info_dict(ydl, info_dict))
+                        else:
+                            ydl.record_download_archive(info_dict)
+                else:
+                    info_dict = ydl.extract_info(url)
+                    downloaded_files_basename.update(self.create_basenames_from_ydl_info_dict(ydl, info_dict))
 
         self.logger.debug(
             'Basenames obtained from url (%s): %s'
@@ -213,7 +238,7 @@ class TubeUp(object):
                              ydl_output_template=None):
         """
         Generate a dictionary that contains options that will be used
-        by youtube_dl.
+        by yt-dlp.
 
         :param ydl_progress_hook:     A function that will be called during the
                                       download process by youtube_dl.
@@ -244,7 +269,6 @@ class TubeUp(object):
             'forcejson': False,
             'writeinfojson': True,
             'writedescription': True,
-            'getcomments': self.get_comments,
             'writethumbnail': True,
             'writeannotations': True,
             'writesubtitles': True,
@@ -294,7 +318,8 @@ class TubeUp(object):
         :param custom_meta:    A custom meta, will be used by internetarchive
                                library when uploading to archive.org.
         :return:               A tuple containing item name and metadata used
-                               when uploading to archive.org.
+                               when uploading to archive.org and whether the item
+                               already exists.
         """
         json_metadata_filepath = videobasename + '.info.json'
         with open(json_metadata_filepath, 'r', encoding='utf-8') as f:
@@ -304,9 +329,10 @@ class TubeUp(object):
                                vid_meta['display_id']))
 
         # Exit if video download did not complete, don't upload .part files to IA
-        if glob.glob(videobasename + '*.part'):
-            msg = 'Video download incomplete, re-attempt archival attempt, exiting...'
-            raise Exception(msg)
+        for ext in ['*.part', '*.f303.*', '*.f302.*', '*.ytdl', '*.f251.*', '*.248.*', '*.f247.*', '*.temp']:
+            if glob.glob(videobasename + ext):
+                msg = 'Video download incomplete, please re-run or delete video stubs in downloads folder, exiting...'
+                raise Exception(msg)
 
         # Replace illegal characters within identifer
         itemname = sanitize_identifier(itemname)
@@ -341,7 +367,7 @@ class TubeUp(object):
             metadata.update(custom_meta)
 
         # Parse internetarchive configuration file.
-        parsed_ia_s3_config = parse_config_file(self.ia_config_path)[1]['s3']
+        parsed_ia_s3_config = parse_config_file(self.ia_config_path)[2]['s3']
         s3_access_key = parsed_ia_s3_config['access']
         s3_secret_key = parsed_ia_s3_config['secret']
 
@@ -364,7 +390,8 @@ class TubeUp(object):
     def archive_urls(self, urls, custom_meta=None,
                      cookie_file=None, proxy=None,
                      ydl_username=None, ydl_password=None,
-                     use_download_archive=False):
+                     use_download_archive=False,
+                     ignore_existing_item=False):
         """
         Download and upload videos from youtube_dl supported sites to
         archive.org
@@ -383,12 +410,13 @@ class TubeUp(object):
                                       This will download only videos not listed in
                                       the archive file. Record the IDs of all
                                       downloaded videos in it.
+        :param ignore_existing_item:  Ignores the check for existing items on archive.org.
         :return:                      Tuple containing identifier and metadata of the
                                       file that has been uploaded to archive.org.
         """
         downloaded_file_basenames = self.get_resource_basenames(
-            urls, cookie_file, proxy, ydl_username, ydl_password, use_download_archive)
-
+            urls, cookie_file, proxy, ydl_username, ydl_password, use_download_archive,
+            ignore_existing_item)
         for basename in downloaded_file_basenames:
             identifier, meta = self.upload_ia(basename, custom_meta)
             yield identifier, meta
@@ -457,8 +485,6 @@ class TubeUp(object):
         except TypeError:  # apparently uploader is null as well
             uploader = 'tubeup.py'
 
-        uploader_url = vid_meta.get('uploader_url', videourl)
-
         try:  # some videos don't give an upload date
             d = datetime.strptime(vid_meta['upload_date'], '%Y%m%d')
             upload_date = d.isoformat().split('T')[0]
@@ -499,11 +525,7 @@ class TubeUp(object):
         if description_text is None:
             description_text = ''
         # archive.org does not display raw newlines
-        description_text = re.sub('\r?\n', '<br>', description_text)
-
-        description = ('{0} <br/><br/>Source: <a href="{1}">{2}</a>'
-                       '<br/>Uploader: <a href="{3}">{4}</a>').format(
-            description_text, videourl, videourl, uploader_url, uploader)
+        description = re.sub('\r?\n', '<br>', description_text)
 
         metadata = dict(
             mediatype=('audio'),
@@ -520,5 +542,11 @@ class TubeUp(object):
             # Set 'scanner' metadata pair to allow tracking of TubeUp
             # powered uploads, per request from archive.org
             scanner="TubeUp Stream Mirroring Application - Leet's Audio Fork 0.0.28")
+
+        # add channel url if it exists
+        if 'uploader_url' in vid_meta:
+            metadata["channel"] = vid_meta["uploader_url"]
+        elif 'channel_url' in vid_meta:
+            metadata["channel"] = vid_meta["channel_url"]
 
         return metadata
