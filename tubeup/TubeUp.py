@@ -496,7 +496,7 @@ class TubeUp(object):
 
         # load up tags into an IA compatible semicolon-separated string
         # example: Youtube;video;
-        tags_string = '%s;audio;' % vid_meta['extractor_key']
+        tags_string = '%s;video;' % vid_meta['extractor_key']
 
         if 'categories' in vid_meta:
             # add categories as tags as well, if they exist
@@ -510,7 +510,7 @@ class TubeUp(object):
             try:
                 if 'tags' in vid_meta is None:
                     tags_string += '%s;' % vid_meta['id']
-                    tags_string += '%s;' % 'audio'
+                    tags_string += '%s;' % 'video'
                 else:
                     for tag in vid_meta['tags']:
                         tags_string += '%s;' % tag
@@ -528,7 +528,8 @@ class TubeUp(object):
         description = re.sub('\r?\n', '<br>', description_text)
 
         metadata = dict(
-            mediatype=('audio'),
+            mediatype=('audio' if collection == 'opensource_audio'
+                       else 'movies'),
             creator=uploader,
             collection=collection,
             title=title,
@@ -541,7 +542,7 @@ class TubeUp(object):
 
             # Set 'scanner' metadata pair to allow tracking of TubeUp
             # powered uploads, per request from archive.org
-            scanner="TubeUp Stream Mirroring Application - Leet's Audio Fork 0.0.28")
+            scanner='TubeUp Video Stream Mirroring Application {}'.format(__version__))
 
         # add channel url if it exists
         if 'uploader_url' in vid_meta:
