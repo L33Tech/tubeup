@@ -429,7 +429,7 @@ class TubeUp(object):
         :param url:  URL that the collection type will be determined.
         :return:     String, name of a collection.
         """
-        if urlparse(url).netloc == 'soundcloud.com':
+        if urlparse(url).netloc in ['soundcloud.com', 'bandcamp.com']:
             return 'opensource_audio'
         return 'opensource_movies'
 
@@ -496,7 +496,10 @@ class TubeUp(object):
 
         # load up tags into an IA compatible semicolon-separated string
         # example: Youtube;video;
-        tags_string = '%s;video;' % vid_meta['extractor_key']
+        if any ["soundcloud", "bandcamp"] in videourl:
+            tags_string = '%s;audio;' % vid_meta['extractor_key']
+        else:
+            tags_string = '%s;video;' % vid_meta['extractor_key']
 
         if 'categories' in vid_meta:
             # add categories as tags as well, if they exist
@@ -510,7 +513,10 @@ class TubeUp(object):
             try:
                 if 'tags' in vid_meta is None:
                     tags_string += '%s;' % vid_meta['id']
-                    tags_string += '%s;' % 'video'
+                    if any ["soundcloud", "bandcamp"] in videourl:
+                        tags_string += '%s;' % 'audio'
+                    else:
+                        tags_string += '%s;' % 'video'
                 else:
                     for tag in vid_meta['tags']:
                         tags_string += '%s;' % tag
